@@ -1,18 +1,19 @@
 from bs4 import BeautifulSoup
 import re
 
-shop_methods = []
+shop_methods = {}
 
 
 def search_method(shop_fun):
-    shop_methods.append(shop_fun)
+    shop_methods[shop_fun.__doc__] = shop_fun
     return shop_fun
 
 
 @search_method
-def co2(page, item):
-    def has_item(tag, good):
-        if good in tag.contents:
+def co2_extract(page, item):
+    """co2-extract"""
+    def has_item(tag, item):
+        if item in tag.contents:
             return True
         return False
 
@@ -23,5 +24,19 @@ def co2(page, item):
         print('item found')
     else:
         print('not found item')
+    price = None
+    return 'co2-extract', item, price
 
 
+@search_method
+def my_formula(page, item):
+    """my-formula"""
+    price = None
+    return 'my-formula', item, price
+
+
+@search_method
+def magicsoup(page, item):
+    """magicsoup"""
+    price = None
+    return 'magicsoap', item, price

@@ -1,7 +1,0 @@
-200 links download:
-- asynchronous [130 s]
-- synchronous  [420 s]
-
-200 links download aiohttp + beautifulsoup parsing:
-- synchronous [139 s]
-- 

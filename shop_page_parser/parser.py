@@ -1,19 +1,37 @@
 from .shop_methods import shop_methods
 
 
+def get_shop_name(link):
+    shop_name_tmp = link.split('/')[2]
+    shop_addr = shop_name_tmp.split('.')
+    if 'www' in shop_addr:
+        shop_name = shop_addr[shop_addr.index('www') + 1]
+    else:
+        shop_name = shop_addr[0]
+    return shop_name
+
+
 def get_parse_method(link):
-    # extract shop name from link
-    # iterate shop_methods to look for shop name
-    # if nothing found log out the request to implement the parsing method for shop
-    # if method found return this method as a function
-    pass
+    shop_name = get_shop_name(link)
+    parse_method = shop_methods.get(shop_name, None)
+
+    if not parse_method:
+        #   todo: add ckecking if the link is actually a shop
+        print('implement search method for {}:{}'.format(link, shop_name))
+        return None
+
+    return parse_method
 
 
-def parse_shop_pages(items_queue):
+def parse_item_pages(items_queue):
     while True:
         queue_element = items_queue.get()
         if len(queue_element) == 3:
             link, page, item = queue_element
-            parse_result = get_parse_method(link)(page, item)
+            parse_method = get_parse_method(link)
+            if parse_method:
+                parse_result = parse_method(page, item)
+                print(parse_result)
+
         elif queue_element == 'mission complete':
             break

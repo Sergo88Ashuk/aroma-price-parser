@@ -1,14 +1,16 @@
 import asyncio
-from time import time
 import multiprocessing as mp
+from time import time
 
 from aiohttp import ClientOSError, ServerDisconnectedError, ClientSession
 from googlesearch import search
-from shop_page_parser.parser import parse_shop_pages
+from shop_page_parser.parser import parse_item_pages
+from links_for_debug import recs_dbg
 
 
 LINKS_PER_ITEM = 20
-ITEMS = ['Йогуртин']
+ITEMS = ['Йогуртин', 'НУФ']
+SEARCH_FOR_ITEMS = True
 
 
 async def put_item_page_to_queue(client, link, queue, item):
@@ -25,24 +27,27 @@ async def put_item_page_to_queue(client, link, queue, item):
         print('fail to decode unicode', link)
 
 
-def get_item_links(items):
-    links = []
+def get_items_rec(items):
+    search_prefix = 'руб | купить '
+    recs = []
     for item in items:
-        for url in search(item, num=LINKS_PER_ITEM, stop=LINKS_PER_ITEM):
-            links.append(dict({item: url}))
-    print(links)
-    return links
+        for url in search(search_prefix+item, num=LINKS_PER_ITEM, stop=LINKS_PER_ITEM):
+            recs.append(tuple([item, url]))
+
+    return recs
 
 
-async def get_items(q, items):
-    google_time_start = time()
-    item_links = get_item_links(items)   # links_dbg   #get_shops_list(good)
-    print('time for googling', time() - google_time_start)
+async def get_item_pages(q, items):
+    if SEARCH_FOR_ITEMS:
+        items_rec = get_items_rec(items)
+    else:
+        items_rec = recs_dbg
 
     tasks = []
     async with ClientSession() as client:
-        for item, link in item_links.items():
-            task = asyncio.ensure_future(put_item_page_to_queue(client, link, q, item))
+        for rec in items_rec:
+            item, url = rec
+            task = asyncio.ensure_future(put_item_page_to_queue(client, url, q, item))
             tasks.append(task)
         await asyncio.gather(*tasks)
 
@@ -53,15 +58,15 @@ def main():
     start_time = time()
 
     item_queue = mp.Queue()
-    parser_process = mp.Process(target=parse_shop_pages, args=(item_queue,))
+    parser_process = mp.Process(target=parse_item_pages, args=(item_queue,))
     parser_process.start()
 
     loop = asyncio.get_event_loop()
-    future = asyncio.ensure_future(get_items(item_queue, items_list))
+    future = asyncio.ensure_future(get_item_pages(item_queue, items_list))
     loop.run_until_complete(future)
 
     item_queue.put('mission complete')
-    parser_process.join()
+    parser_process.join(timeout=2.0)
 
     taken_time = time() - start_time
     print('TIME LEFT:', taken_time)

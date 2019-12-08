@@ -1,0 +1,10 @@
+some benchmarks taken while debugging:
+
+200 pages download:
+- asynchronous aiohttp [130 s]
+- synchronous requests [420 s]
+
+200 pages download aiohttp + beautifulsoup parsing:
+- synchronous     [139 s]
+- multiprocessing [130 s]
+- multithreading 
