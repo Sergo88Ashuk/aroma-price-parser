@@ -58,7 +58,8 @@ def main():
     start_time = time()
 
     item_queue = mp.Queue()
-    parser_process = mp.Process(target=parse_item_pages, args=(item_queue,))
+    result_queue = mp.Queue()
+    parser_process = mp.Process(target=parse_item_pages, args=(item_queue, result_queue, ))
     parser_process.start()
 
     loop = asyncio.get_event_loop()
@@ -66,10 +67,13 @@ def main():
     loop.run_until_complete(future)
 
     item_queue.put('mission complete')
-    parser_process.join(timeout=2.0)
+    parser_process.join(timeout=10.0)
+
+    prices = result_queue.get()
 
     taken_time = time() - start_time
     print('TIME LEFT:', taken_time)
+    print(prices)
 
 
 if __name__ == '__main__':

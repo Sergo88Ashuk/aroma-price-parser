@@ -17,13 +17,14 @@ def get_parse_method(link):
 
     if not parse_method:
         #   todo: add ckecking if the link is actually a shop
-        print('implement search method for {}:{}'.format(link, shop_name))
+        # print('implement search method for {} {}'.format(link, shop_name))
         return None
 
     return parse_method
 
 
-def parse_item_pages(items_queue):
+def parse_item_pages(items_queue, result_queue):
+    results = []
     while True:
         queue_element = items_queue.get()
         if len(queue_element) == 3:
@@ -31,7 +32,8 @@ def parse_item_pages(items_queue):
             parse_method = get_parse_method(link)
             if parse_method:
                 parse_result = parse_method(page, item)
-                print(parse_result)
+                results.append(parse_result)
 
         elif queue_element == 'mission complete':
+            result_queue.put(results)
             break
