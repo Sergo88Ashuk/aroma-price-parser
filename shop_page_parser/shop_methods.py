@@ -46,7 +46,11 @@ def my_formula(page, item):
     else:
         price = 0
 
-    weight = 0
+    weight_tag_top = soup.find(name='span', itemprop='item')
+    weight_tag = weight_tag_top.find(name='span', itemprop='name')
+    weight_str = str(weight_tag.string).strip('\xa0')
+    weight = re.findall(r'(\d{1,} (г|мл))', weight_str)[0][0]
+
     return 'my-formula', item, price, weight
 
 
@@ -62,9 +66,10 @@ def magicsoap(page, item):
         prod_tag = tags[0].parent
         price_tag = prod_tag.find(name='label')
         price = price_tag.contents[2].split('(')[1].split(')')[0]
+        weight = re.findall(r'(\d{1,} (кг))', price_tag.contents[0])[0][0]
 
     else:
         price = 0
+        weight = 0
 
-    weight = 0
     return 'magicsoap', item, price, weight
