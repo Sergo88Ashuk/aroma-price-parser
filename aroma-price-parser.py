@@ -9,7 +9,7 @@ from debug.links_for_debug import recs_dbg
 
 
 LINKS_PER_ITEM = 20
-ITEMS = ['Йогуртин', 'НУФ']
+ITEMS = ['Йогуртин', 'НУФ', 'Фукогель', 'Мочевина']
 SEARCH_FOR_ITEMS = True
 
 
@@ -73,7 +73,8 @@ def main():
 
     taken_time = time() - start_time
     print('TIME LEFT:', taken_time)
-    print(prices)
+    for item in prices:
+        print(item)
 
 
 if __name__ == '__main__':
